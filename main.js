@@ -45,13 +45,11 @@ MQTTclient.on("message", function(topic, message) {
   if (topics[0] == "tgr2020") {
     try {
       let json = JSON.parse(message.toString());
-
-      // let obj = Object.assign({}, {data: json}, { MQTT: { ID: topics[3] } });
       let obj = { ts: new Date(), sensor_type: topics[1], sensor_id: topics[3], data: json };
-      console.log(obj);
       if (dbo != "") {
         dbo.collection("raw_data").insertOne(obj, function(err, res) {
           if (err) throw err;
+          console.log("Add success.", new Date());
         });
       } else {
         console.log("Not connect DB.");
