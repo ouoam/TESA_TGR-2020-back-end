@@ -43,7 +43,7 @@ MongoClient.connect(
 
 MQTTclient.on("connect", function() {
   console.log("Connect to MQTT successful.");
-  MQTTclient.subscribe("tgr2020/pm25/data/#");
+  MQTTclient.subscribe("tgr2020/+/data/+");
 });
 
 MQTTclient.on("message", function(topic, message) {
