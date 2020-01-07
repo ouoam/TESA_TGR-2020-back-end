@@ -5,7 +5,9 @@ var MongoClient = require("mongodb").MongoClient;
 var url = "mongodb://mongo.js:H7Jk9QjBwe24WvEhlS8fwTBIJZ8n0Z@19991999.xyz:27017/";
 
 var mqtt = require("mqtt");
-var MQTTclient = mqtt.connect("mqtt://202.139.192.75");
+var MQTTclient = mqtt.connect("mqtt://202.139.192.75", {
+  clientId: "tgr32"
+});
 
 var dbo = "";
 
@@ -40,14 +42,15 @@ MQTTclient.on("connect", function() {
 MQTTclient.on("message", function(topic, message) {
   //  console.log(topic.toString() + " => " + message.toString());
   topics = topic.toString().split("/");
-  if (topics[0] == "tgr2020" && topics[2] == "data") {
+  if (topics[0] == "tgr2020") {
     try {
       let json = JSON.parse(message.toString());
 
-      let obj = Object.assign({}, json, { MQTT: { ID: topics[3] } });
-      //console.log(obj);
+      // let obj = Object.assign({}, {data: json}, { MQTT: { ID: topics[3] } });
+      let obj = { ts: new Date(), sensor_type: topics[1], sensor_id: topics[3], data: json };
+      console.log(obj);
       if (dbo != "") {
-        dbo.collection(topics[1]).insertOne(obj, function(err, res) {
+        dbo.collection("raw_data").insertOne(obj, function(err, res) {
           if (err) throw err;
         });
       } else {
