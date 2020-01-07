@@ -8,7 +8,10 @@ MongoClient.connect(
     useUnifiedTopology: true
   },
   function(err, db) {
-    if (err) throw err;
+    if (err) {
+      console.log("Connection to MongoDB error.");
+      // throw err;
+    }
     console.log("Connect to MongoDB successful.");
     db.close();
   }

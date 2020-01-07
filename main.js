@@ -9,6 +9,13 @@ var MQTTclient = mqtt.connect("mqtt://202.139.192.75", {
   clientId: "tgr32"
 });
 
+const io = require("@pm2/io");
+
+const reqsec = io.meter({
+  name: "req/min",
+  samples: 60
+});
+
 var dbo = "";
 
 app.use(express.json());
@@ -50,6 +57,7 @@ MQTTclient.on("message", function(topic, message) {
         dbo.collection("raw_data").insertOne(obj, function(err, res) {
           if (err) throw err;
           console.log("Add success.", new Date());
+          reqsec.mark();
         });
       } else {
         console.log("Not connect DB.");
