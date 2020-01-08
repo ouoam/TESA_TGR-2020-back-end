@@ -20,5 +20,5 @@ let app = {
 
 app.mqtt.on("newData", function(data) {
   reqMQTT.mark();
-  app.mongo.addData(result.parsed.MONGO_COLL, data);
+  app.mongo.addData(data);
 });
