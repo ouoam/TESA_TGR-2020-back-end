@@ -2,9 +2,7 @@ const Joi = require("@hapi/joi");
 
 const schema = Joi.object({
   DevEUI_uplink: {
-    LrrRSSI: Joi.number()
-      .integer()
-      .required(),
+    LrrRSSI: Joi.number().required(),
     LrrLAT: Joi.number().required(),
     LrrLON: Joi.number().required(),
     payload_hex: Joi.string()
