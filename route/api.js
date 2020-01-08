@@ -1,8 +1,19 @@
 const express = require("express");
 const router = express.Router();
 
-router.route("/track_data/list").get(() => {});
-router.route("/track_data/:sensor_id").get(() => {});
+let app = {};
 
-router.route("/pm25_data/list").get(() => {});
-router.route("/pm25_data/:sensor_id").get(() => {});
+module.exports = appIn => {
+  app = appIn;
+  router.get("/", (req, res) => {
+    res.send("hihi");
+  });
+
+  router.get("/track_data/list", () => {});
+  router.get("/track_data/:sensor_id", () => {});
+
+  router.get("/pm25_data/list", () => {});
+  router.get("/pm25_data/:sensor_id", () => {});
+
+  return router;
+};

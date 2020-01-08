@@ -12,11 +12,13 @@ if (result.error) {
   } else throw result.error;
 }
 
-let app = {
-  mqtt: require("./component/mqtt.js")(result.parsed),
-  web: require("./component/express.js")(result.parsed),
-  mongo: require("./component/mongo.js")(result.parsed)
-};
+let app = {};
+
+app.env = result.parsed;
+
+app.mqtt = require("./component/mqtt.js")(app);
+app.web = require("./component/express.js")(app);
+app.mongo = require("./component/mongo.js")(app);
 
 app.mqtt.on("newData", function(data) {
   reqMQTT.mark();

@@ -1,16 +1,18 @@
 const EventEmitter = require("events");
 const MQTT = require("mqtt");
 
+let app = {};
+
 class mqttEmitter extends EventEmitter {
-  constructor(env) {
+  constructor() {
     super();
 
     let mqttEmitterThis = this;
 
     this.MQTTclient = {};
 
-    this.MQTTclient = MQTT.connect(env.MQTT_SERVER, {
-      clientId: env.MQTT_CLIENT
+    this.MQTTclient = MQTT.connect(app.env.MQTT_SERVER, {
+      clientId: app.env.MQTT_CLIENT
     });
 
     this.MQTTclient.on("connect", function() {
@@ -24,7 +26,7 @@ class mqttEmitter extends EventEmitter {
         let msg = message.toString();
         try {
           let json = JSON.parse(msg);
-          let obj = { ts: new Date(), sensor_type: topics[1], sensor_id: topics[3], data: json };
+          let obj = { ts: new Date(), sensor_type: topics[1], sensor_id: Number(topics[3]), data: json };
           mqttEmitterThis.emit("newData", obj);
         } catch (e) {
           console.log("entering catch block");
@@ -35,8 +37,7 @@ class mqttEmitter extends EventEmitter {
   }
 }
 
-let mqtt = function(env) {
-  return new mqttEmitter(env);
+module.exports = function(appIn) {
+  app = appIn;
+  return new mqttEmitter();
 };
-
-module.exports = mqtt;

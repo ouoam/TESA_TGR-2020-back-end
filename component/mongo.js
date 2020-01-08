@@ -6,8 +6,10 @@ const model = {
   pm25: require("./../model/pm25")
 };
 
+let app = {};
+
 class mongoEmitter extends EventEmitter {
-  constructor(env) {
+  constructor() {
     super();
     this.db = {};
     this.dbo = {};
@@ -15,20 +17,20 @@ class mongoEmitter extends EventEmitter {
     let mongoEmitterThis = this;
 
     MongoClient.connect(
-      env.MONGO_SERVER,
+      app.env.MONGO_SERVER,
       {
         useNewUrlParser: true,
         useUnifiedTopology: true,
         auth: {
-          user: env.MONGO_USER,
-          password: env.MONGO_PASS
+          user: app.env.MONGO_USER,
+          password: app.env.MONGO_PASS
         }
       },
       function(err, db) {
         if (err) throw err;
         console.log("Connect to MongoDB successful.");
         mongoEmitterThis.db = db;
-        mongoEmitterThis.dbo = db.db(env.MONGO_DB);
+        mongoEmitterThis.dbo = db.db(app.env.MONGO_DB);
         mongoEmitterThis.emit("connected");
       }
     );
@@ -72,6 +74,47 @@ class mongoEmitter extends EventEmitter {
       console.log("Not connect DB.");
     }
   }
+
+  getPM25List(query, cb) {
+    let find = {};
+    if (query.start) {
+      if (!find.ts) find.ts = {};
+      find.ts.$gte = new Date(query.start);
+    }
+    if (query.end) {
+      if (!find.ts) find.ts = {};
+      find.ts.$lte = new Date(query.end);
+    }
+    let re = this.dbo
+      .collection("pm25_data2")
+      .find(find)
+      .sort({ ts: 1 });
+    if (query.skip) re.skip(Number(query.skip));
+    if (query.limit) re.limit(Number(query.limit));
+    re.toArray(function(err, result) {
+      if (err) throw err;
+      cb(result || null);
+    });
+  }
+
+  getPM25last(devID, cb) {
+    this.dbo
+      .collection("pm25_data2")
+      .find({ id: devID })
+      .sort({ ts: -1 })
+      .limit(1)
+      .toArray(function(err, result) {
+        if (err) throw err;
+        cb(result[0] || null);
+      });
+  }
+
+  getPM25Me(cb) {
+    this.getPM25last(32, cb);
+  }
 }
 
-module.exports = env => new mongoEmitter(env);
+module.exports = appIn => {
+  app = appIn;
+  return new mongoEmitter();
+};
