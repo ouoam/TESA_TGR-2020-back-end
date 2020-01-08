@@ -28,8 +28,20 @@ web.get("/api/pm25_data/me", (req, res) => {
   app.mongo.getPM25Me(data => res.json(data));
 });
 
-web.get("/api/pm25_data/:sensor_id([0-9]*)", (req, res) => {
-  app.mongo.getPM25last(Number(req.params.sensor_id), data => res.json(data));
+web.get("/api/pm25_data/:device_id([0-9]*)", (req, res) => {
+  app.mongo.getPM25Last(Number(req.params.device_id), data => res.json(data));
+});
+
+web.get("/api/track_data/list", (req, res) => {
+  app.mongo.getTrackList(req.query, data => res.json(data));
+});
+
+web.get("/api/track_data/me", (req, res) => {
+  app.mongo.getTrackMe(data => res.json(data));
+});
+
+web.get("/api/track_data/:sensor_id", (req, res) => {
+  app.mongo.getTrackLast(req.params.sensor_id, data => res.json(data));
 });
 
 web.get("/", function(req, res) {
@@ -48,7 +60,7 @@ web.use((err, req, res, next) => {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};
-
+  console.log(err);
   // render the error page
   res.status(err.status || 500);
   res.render("error");

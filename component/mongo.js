@@ -3,7 +3,8 @@ const EventEmitter = require("events");
 const MongoClient = require("mongodb").MongoClient;
 
 const model = {
-  pm25: require("./../model/pm25")
+  pm25: require("./../model/pm25"),
+  track: require("./../model/track")
 };
 
 let app = {};
@@ -38,7 +39,7 @@ class mongoEmitter extends EventEmitter {
 
   addData(data) {
     if (this.db.isConnected()) {
-      this.dbo.collection("raw_data2").insertOne(data, function(err, res) {
+      this.dbo.collection("raw_data").insertOne(data, function(err, res) {
         if (err) throw err;
         console.log("Add raw success.", new Date());
       });
@@ -51,7 +52,7 @@ class mongoEmitter extends EventEmitter {
             let data2 = {
               id: data.sensor_id,
               ts: data.ts,
-              device_id: value.value.DevEUI_uplink.DevEUI,
+              device_id: `tgr${data.sensor_id}`,
               location: {
                 lat: value.value.DevEUI_uplink.LrrLAT,
                 lon: value.value.DevEUI_uplink.LrrLON
@@ -59,15 +60,38 @@ class mongoEmitter extends EventEmitter {
               rssi: value.value.DevEUI_uplink.LrrRSSI,
               value: sensorVal
             };
-            this.dbo.collection("pm25_data2").insertOne(data2, function(err, res) {
+            this.dbo.collection("pm25_data").insertOne(data2, function(err, res) {
               if (err) throw err;
-              console.log("Add success.", new Date());
+              console.log("Add success. PM25", new Date());
             });
           } else {
             console.log("Sensor is error don't add.");
           }
         } else {
           console.log("Data validation error.");
+        }
+      } else if (data.sensor_type == "track") {
+        let value = model.track.validate(data.data);
+        if (!value.error) {
+          let sensorVal = value.value.DevEUI_uplink.payload_hex;
+          let data2 = {
+            id: data.sensor_id,
+            ts: data.ts,
+            sensor_id: `tgr${data.sensor_id}`,
+            location: {
+              lat: value.value.DevEUI_uplink.LrrLAT,
+              lon: value.value.DevEUI_uplink.LrrLON
+            },
+            rssi: value.value.DevEUI_uplink.LrrRSSI,
+            value: sensorVal
+          };
+          this.dbo.collection("track_data").insertOne(data2, function(err, res) {
+            if (err) throw err;
+            console.log("Add success. track", new Date());
+          });
+        } else {
+          console.log("Data validation error.");
+          console.log(value);
         }
       }
     } else {
@@ -86,7 +110,7 @@ class mongoEmitter extends EventEmitter {
       find.ts.$lte = new Date(query.end);
     }
     let re = this.dbo
-      .collection("pm25_data2")
+      .collection("pm25_data")
       .find(find)
       .sort({ ts: 1 });
     if (query.skip) re.skip(Number(query.skip));
@@ -97,9 +121,9 @@ class mongoEmitter extends EventEmitter {
     });
   }
 
-  getPM25last(devID, cb) {
+  getPM25Last(devID, cb) {
     this.dbo
-      .collection("pm25_data2")
+      .collection("pm25_data")
       .find({ id: devID })
       .sort({ ts: -1 })
       .limit(1)
@@ -110,7 +134,45 @@ class mongoEmitter extends EventEmitter {
   }
 
   getPM25Me(cb) {
-    this.getPM25last(32, cb);
+    this.getPM25Last(32, cb);
+  }
+
+  getTrackList(query, cb) {
+    let find = {};
+    if (query.start) {
+      if (!find.ts) find.ts = {};
+      find.ts.$gte = new Date(query.start);
+    }
+    if (query.end) {
+      if (!find.ts) find.ts = {};
+      find.ts.$lte = new Date(query.end);
+    }
+    let re = this.dbo
+      .collection("track_data")
+      .find(find)
+      .sort({ ts: 1 });
+    if (query.skip) re.skip(Number(query.skip));
+    if (query.limit) re.limit(Number(query.limit));
+    re.toArray(function(err, result) {
+      if (err) throw err;
+      cb(result || null);
+    });
+  }
+
+  getTrackLast(devID, cb) {
+    this.dbo
+      .collection("track_data")
+      .find({ sensor_id: devID })
+      .sort({ ts: -1 })
+      .limit(1)
+      .toArray(function(err, result) {
+        if (err) throw err;
+        cb(result[0] || null);
+      });
+  }
+
+  getTrackMe(cb) {
+    this.getTrackLast("tgr32", cb);
   }
 }
 
