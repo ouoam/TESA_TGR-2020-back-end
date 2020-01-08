@@ -24,7 +24,7 @@ web.get("/api/pm25_data/list", (req, res) => {
   app.mongo.getPM25List(req.query, data => res.json(data));
 });
 
-web.get("/api/pm25_data/me", (req, res) => {
+web.get("/api/pm25_data/test", (req, res) => {
   app.mongo.getPM25Me(data => res.json(data));
 });
 
@@ -36,7 +36,7 @@ web.get("/api/track_data/list", (req, res) => {
   app.mongo.getTrackList(req.query, data => res.json(data));
 });
 
-web.get("/api/track_data/me", (req, res) => {
+web.get("/api/track_data/test", (req, res) => {
   app.mongo.getTrackMe(data => res.json(data));
 });
 
