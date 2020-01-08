@@ -1,17 +1,24 @@
 const io = require("@pm2/io");
 
-const reqsec = io.meter({
-  name: "req/min",
+const reqMQTT = io.meter({
+  name: "MQTT req/min",
   samples: 60
 });
 
+const result = require("dotenv").config();
+if (result.error) {
+  if (result.code == "ENOENT") {
+    console.log("You don't have .env file!!");
+  } else throw result.error;
+}
+
 let app = {
-  mqtt: require("./component/mqtt.js"),
-  web: require("./component/express.js"),
-  mongo: require("./component/mongo.js")
+  mqtt: require("./component/mqtt.js")(result.parsed),
+  web: require("./component/express.js")(result.parsed),
+  mongo: require("./component/mongo.js")(result.parsed)
 };
 
 app.mqtt.on("newData", function(data) {
-  reqsec.mark();
-  app.mongo.addData("raw_data", data);
+  reqMQTT.mark();
+  app.mongo.addData(result.parsed.MONGO_COLL, data);
 });

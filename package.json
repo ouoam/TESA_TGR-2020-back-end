@@ -18,6 +18,7 @@
   "homepage": "https://gitlab.com/ouoam/tgr-2020-server#readme",
   "dependencies": {
     "@pm2/io": "^4.3.3",
+    "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "mongodb": "^3.4.1",
     "mqtt": "^3.0.0"
