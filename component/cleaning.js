@@ -31,20 +31,25 @@ async function cleansing() {
               let device_id = Number.parseInt(value.value.DevEUI_uplink.payload_hex.substring(0, 2), 16);
 
               if (device_id == element.sensor_id && sensorVal != 191) {
-                let data2 = {
-                  ts: element.ts,
-                  device_id: Number(element.sensor_id),
-                  lat: value.value.DevEUI_uplink.LrrLAT,
-                  lon: value.value.DevEUI_uplink.LrrLON,
-                  rssi: value.value.DevEUI_uplink.LrrRSSI,
-                  value: sensorVal
-                };
-                db.collection("pm25_data" + app.env.MONGO_COLL).insertOne(data2, function(err, res) {
-                  if (err) throw err;
-                  // console.log("Add success. PM25", new Date());
-                });
+                let diff_time = Math.abs(element.ts - value.value.DevEUI_uplink.Time);
+                if (diff_time < 1000 * 60 * 3) {
+                  let data2 = {
+                    ts: element.ts,
+                    device_id: Number(element.sensor_id),
+                    lat: value.value.DevEUI_uplink.LrrLAT,
+                    lon: value.value.DevEUI_uplink.LrrLON,
+                    rssi: value.value.DevEUI_uplink.LrrRSSI,
+                    value: sensorVal
+                  };
+                  db.collection("pm25_data" + app.env.MONGO_COLL).insertOne(data2, function(err, res) {
+                    if (err) throw err;
+                    // console.log("Add success. PM25", new Date());
+                  });
 
-                app.influx.writePM25(data2);
+                  app.influx.writePM25(data2);
+                } else {
+                  console.log("Data invalid time. time is diff more than 3 min", new Date());
+                }
               } else {
                 console.log("Data error not own device id or sensor error.", new Date());
               }

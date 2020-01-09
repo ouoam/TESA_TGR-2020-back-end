@@ -14,7 +14,8 @@ const schema = Joi.object({
       .required(),
     DevEUI: Joi.string()
       .hex()
-      .required()
+      .required(),
+    Time: Joi.date().required()
   }).required()
 }).options({ stripUnknown: true });
 
