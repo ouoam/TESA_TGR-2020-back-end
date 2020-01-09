@@ -3,6 +3,8 @@ const EventEmitter = require("events");
 const express = require("express");
 const web = express();
 
+var cors = require("cors");
+
 let app = {};
 
 class webEmitter extends EventEmitter {
@@ -15,6 +17,7 @@ class webEmitter extends EventEmitter {
   }
 }
 
+web.use(cors());
 web.use(express.json());
 web.use(express.urlencoded({ extended: true }));
 
