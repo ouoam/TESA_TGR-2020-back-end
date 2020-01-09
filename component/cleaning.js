@@ -27,26 +27,28 @@ async function cleansing() {
           if (element.sensor_type == "pm25") {
             let value = model.pm25.validate(element.data);
             if (!value.error) {
-              let sensorVal = value.value.DevEUI_uplink.payload_hex;
-              let data2 = {
-                id: element.sensor_id,
-                ts: element.ts,
-                device_id: `tgr${element.sensor_id}`,
-                location: {
+              let sensorVal = Number.parseInt(value.value.DevEUI_uplink.payload_hex.substring(2, 4), 16);
+              let device_id = Number.parseInt(value.value.DevEUI_uplink.payload_hex.substring(0, 2), 16);
+
+              if (device_id == element.sensor_id && sensorVal != 191) {
+                let data2 = {
+                  ts: element.ts,
+                  device_id: element.sensor_id,
                   lat: value.value.DevEUI_uplink.LrrLAT,
-                  lon: value.value.DevEUI_uplink.LrrLON
-                },
-                rssi: value.value.DevEUI_uplink.LrrRSSI,
-                value: sensorVal
-              };
-              db.collection("pm25_data" + app.env.MONGO_COLL).insertOne(data2, function(err, res) {
-                if (err) throw err;
-                console.log("Add success. PM25", new Date());
-              });
+                  lon: value.value.DevEUI_uplink.LrrLON,
+                  rssi: value.value.DevEUI_uplink.LrrRSSI,
+                  value: sensorVal
+                };
+                db.collection("pm25_data" + app.env.MONGO_COLL).insertOne(data2, function(err, res) {
+                  if (err) throw err;
+                  console.log("Add success. PM25", new Date());
+                });
+              } else {
+                console.log("Data error not own device id or sensor error.", new Date());
+              }
             } else {
               console.log("Data validation error.");
             }
-            isCleaned = true;
           } else if (element.sensor_type == "track") {
             let value = model.track.validate(element.data);
             if (!value.error) {
@@ -64,7 +66,6 @@ async function cleansing() {
             } else {
               console.log("Data validation error.");
             }
-            isCleaned = true;
           }
 
           collection.updateOne({ _id: element._id }, { $set: { cleaned: true } });

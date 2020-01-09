@@ -9,6 +9,8 @@ const schema = Joi.object({
     LrrLON: Joi.number().required(),
     payload_hex: Joi.string()
       .hex()
+      .min(4)
+      .max(4)
       .required(),
     DevEUI: Joi.string()
       .hex()
