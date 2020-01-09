@@ -51,17 +51,12 @@ async function cleansing() {
           } else if (element.sensor_type == "track") {
             let value = model.track.validate(element.data);
             if (!value.error) {
-              let sensorVal = value.value.DevEUI_uplink.payload_hex;
               let data2 = {
                 id: element.sensor_id,
                 ts: element.ts,
                 sensor_id: `tgr${element.sensor_id}`,
-                location: {
-                  lat: value.value.DevEUI_uplink.LrrLAT,
-                  lon: value.value.DevEUI_uplink.LrrLON
-                },
-                rssi: value.value.DevEUI_uplink.LrrRSSI,
-                value: sensorVal
+                rssi: value.value.rssi,
+                mac_addr: value.value.mac_addr
               };
               db.collection("track_data" + app.env.MONGO_COLL).insertOne(data2, function(err, res) {
                 if (err) throw err;
@@ -69,7 +64,6 @@ async function cleansing() {
               });
             } else {
               console.log("Data validation error.");
-              console.log(value);
             }
             isCleaned = true;
           }
