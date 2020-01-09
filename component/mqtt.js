@@ -19,10 +19,15 @@ class mqttEmitter extends EventEmitter {
       console.log("Connect to MQTT successful.");
       mqttEmitterThis.MQTTclient.subscribe("tgr2020/track/data/#");
       mqttEmitterThis.MQTTclient.subscribe("tgr2020/pm25/data/#");
+      mqttEmitterThis.MQTTclient.subscribe("/tgr2020/track/data/#");
+      mqttEmitterThis.MQTTclient.subscribe("/tgr2020/pm25/data/#");
     });
 
     this.MQTTclient.on("message", function(topic, message) {
       let topics = topic.toString().split("/");
+      if (topics[0] == "") {
+        topics.shift();
+      }
       if (topics[0] == "tgr2020" && topics[2] == "data") {
         let msg = message.toString();
         try {
