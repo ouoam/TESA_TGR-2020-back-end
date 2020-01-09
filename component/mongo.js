@@ -118,6 +118,35 @@ class mongoEmitter extends EventEmitter {
   getTrackMe(cb) {
     this.getTrackLast("tgr32", cb);
   }
+
+  getRSSI(cb) {
+    const db = app.mongo.dbo;
+    db.collection("track_data" + app.env.MONGO_COLL)
+      .aggregate([
+        {
+          $match: {
+            mac_addr: "80:E1:26:07:D7:43"
+          }
+        },
+        {
+          $match: {
+            $or: [{ sensor_id: "tgr6" }, { sensor_id: "tgr7" }, { sensor_id: "tgr29" }, { sensor_id: "tgr32" }]
+          }
+        },
+        {
+          $group: {
+            _id: "$sensor_id",
+            rssi: { $last: "$rssi" },
+            ts: { $last: "$ts" },
+            timestamp: { $last: "$timestamp" },
+            event_code: { $last: "$event_code" }
+          }
+        }
+      ])
+      .toArray(function(err, result) {
+        cb(result);
+      });
+  }
 }
 
 module.exports = appIn => {
