@@ -39,6 +39,7 @@ class influxEmitter extends EventEmitter {
   }
 
   writePM25(data) {
+    if (data.value == null) return;
     if (this.influx != "") {
       this.influx
         .writePoints([
