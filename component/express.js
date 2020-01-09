@@ -3,8 +3,6 @@ const EventEmitter = require("events");
 const express = require("express");
 const web = express();
 
-const api = require("./../route/api");
-
 let app = {};
 
 class webEmitter extends EventEmitter {

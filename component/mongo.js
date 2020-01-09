@@ -2,11 +2,6 @@ const EventEmitter = require("events");
 
 const MongoClient = require("mongodb").MongoClient;
 
-const model = {
-  pm25: require("./../model/pm25"),
-  track: require("./../model/track")
-};
-
 let app = {};
 
 class mongoEmitter extends EventEmitter {
@@ -27,73 +22,22 @@ class mongoEmitter extends EventEmitter {
           password: app.env.MONGO_PASS
         }
       },
-      function(err, db) {
+      function(err, mongoclient) {
         if (err) throw err;
         console.log("Connect to MongoDB successful.");
-        mongoEmitterThis.db = db;
-        mongoEmitterThis.dbo = db.db(app.env.MONGO_DB);
+        mongoEmitterThis.client = mongoclient;
+        mongoEmitterThis.dbo = mongoclient.db(app.env.MONGO_DB);
         mongoEmitterThis.emit("connected");
       }
     );
   }
 
   addData(data) {
-    if (this.db.isConnected()) {
-      this.dbo.collection("raw_data").insertOne(data, function(err, res) {
+    if (this.client && this.client.isConnected()) {
+      this.dbo.collection("raw_data" + app.env.MONGO_COLL).insertOne(data, function(err, res) {
         if (err) throw err;
         console.log("Add raw success.", new Date());
       });
-
-      if (data.sensor_type == "pm25") {
-        let value = model.pm25.validate(data.data);
-        if (!value.error) {
-          let sensorVal = Number.parseInt(value.value.DevEUI_uplink.payload_hex.substring(2, 4), 16);
-          if (sensorVal != 191) {
-            let data2 = {
-              id: data.sensor_id,
-              ts: data.ts,
-              device_id: `tgr${data.sensor_id}`,
-              location: {
-                lat: value.value.DevEUI_uplink.LrrLAT,
-                lon: value.value.DevEUI_uplink.LrrLON
-              },
-              rssi: value.value.DevEUI_uplink.LrrRSSI,
-              value: sensorVal
-            };
-            this.dbo.collection("pm25_data").insertOne(data2, function(err, res) {
-              if (err) throw err;
-              console.log("Add success. PM25", new Date());
-            });
-          } else {
-            console.log("Sensor is error don't add.");
-          }
-        } else {
-          console.log("Data validation error.");
-        }
-      } else if (data.sensor_type == "track") {
-        let value = model.track.validate(data.data);
-        if (!value.error) {
-          let sensorVal = value.value.DevEUI_uplink.payload_hex;
-          let data2 = {
-            id: data.sensor_id,
-            ts: data.ts,
-            sensor_id: `tgr${data.sensor_id}`,
-            location: {
-              lat: value.value.DevEUI_uplink.LrrLAT,
-              lon: value.value.DevEUI_uplink.LrrLON
-            },
-            rssi: value.value.DevEUI_uplink.LrrRSSI,
-            value: sensorVal
-          };
-          this.dbo.collection("track_data").insertOne(data2, function(err, res) {
-            if (err) throw err;
-            console.log("Add success. track", new Date());
-          });
-        } else {
-          console.log("Data validation error.");
-          console.log(value);
-        }
-      }
     } else {
       console.log("Not connect DB.");
     }
@@ -110,7 +54,7 @@ class mongoEmitter extends EventEmitter {
       find.ts.$lte = new Date(query.end);
     }
     let re = this.dbo
-      .collection("pm25_data")
+      .collection("pm25_data" + app.env.MONGO_COLL)
       .find(find)
       .sort({ ts: 1 });
     if (query.skip) re.skip(Number(query.skip));
@@ -123,7 +67,7 @@ class mongoEmitter extends EventEmitter {
 
   getPM25Last(devID, cb) {
     this.dbo
-      .collection("pm25_data")
+      .collection("pm25_data" + app.env.MONGO_COLL)
       .find({ id: devID })
       .sort({ ts: -1 })
       .limit(1)
@@ -148,7 +92,7 @@ class mongoEmitter extends EventEmitter {
       find.ts.$lte = new Date(query.end);
     }
     let re = this.dbo
-      .collection("track_data")
+      .collection("track_data" + app.env.MONGO_COLL)
       .find(find)
       .sort({ ts: 1 });
     if (query.skip) re.skip(Number(query.skip));
@@ -161,7 +105,7 @@ class mongoEmitter extends EventEmitter {
 
   getTrackLast(devID, cb) {
     this.dbo
-      .collection("track_data")
+      .collection("track_data" + app.env.MONGO_COLL)
       .find({ sensor_id: devID })
       .sort({ ts: -1 })
       .limit(1)
