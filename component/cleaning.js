@@ -24,7 +24,6 @@ async function cleansing() {
         if (err) throw err;
 
         result.forEach(element => {
-          let isCleaned = false;
           if (element.sensor_type == "pm25") {
             let value = model.pm25.validate(element.data);
             if (!value.error) {
@@ -68,9 +67,7 @@ async function cleansing() {
             isCleaned = true;
           }
 
-          if (isCleaned) {
-            collection.updateOne({ _id: element._id }, { $set: { cleaned: true } });
-          }
+          collection.updateOne({ _id: element._id }, { $set: { cleaned: true } });
         });
       });
   } catch (err) {
