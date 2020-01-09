@@ -33,7 +33,7 @@ async function cleansing() {
               if (device_id == element.sensor_id && sensorVal != 191) {
                 let data2 = {
                   ts: element.ts,
-                  device_id: element.sensor_id,
+                  device_id: Number(element.sensor_id),
                   lat: value.value.DevEUI_uplink.LrrLAT,
                   lon: value.value.DevEUI_uplink.LrrLON,
                   rssi: value.value.DevEUI_uplink.LrrRSSI,
@@ -53,7 +53,6 @@ async function cleansing() {
             let value = model.track.validate(element.data);
             if (!value.error) {
               let data2 = {
-                id: element.sensor_id,
                 ts: element.ts,
                 sensor_id: `tgr${element.sensor_id}`,
                 rssi: value.value.rssi,
