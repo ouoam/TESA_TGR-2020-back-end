@@ -116,7 +116,15 @@ class mongoEmitter extends EventEmitter {
   }
 
   getTrackMe(cb) {
-    this.getTrackLast("tgr32", cb);
+    this.dbo
+      .collection("track_data" + app.env.MONGO_COLL)
+      .find({ mac_addr: "80:E1:26:07:D7:43", event_code: { $ne: null } })
+      .sort({ ts: -1 })
+      .limit(1)
+      .toArray(function(err, result) {
+        if (err) throw err;
+        cb(result[0] || null);
+      });
   }
 
   getRSSI(cb) {
@@ -134,12 +142,15 @@ class mongoEmitter extends EventEmitter {
           }
         },
         {
+          $sort: {
+            ts: -1
+          }
+        },
+        {
           $group: {
             _id: "$sensor_id",
-            rssi: { $last: "$rssi" },
-            ts: { $last: "$ts" },
-            timestamp: { $last: "$timestamp" },
-            event_code: { $last: "$event_code" }
+            rssi: { $first: "$rssi" },
+            ts: { $first: "$ts" }
           }
         }
       ])
