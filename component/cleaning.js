@@ -19,7 +19,7 @@ async function cleansing() {
     await collection
       .find(query)
       .sort({ _id: 1 })
-      .limit(1000)
+      .limit(5000)
       .toArray(function(err, result) {
         if (err) throw err;
 
@@ -57,7 +57,9 @@ async function cleansing() {
                 ts: element.ts,
                 sensor_id: `tgr${element.sensor_id}`,
                 rssi: value.value.rssi,
-                mac_addr: value.value.mac_addr
+                mac_addr: value.value.mac_addr,
+                timestamp: value.value.timestamp,
+                event_code: value.value.event_code
               };
               db.collection("track_data" + app.env.MONGO_COLL).insertOne(data2, function(err, res) {
                 if (err) throw err;
@@ -76,7 +78,7 @@ async function cleansing() {
   }
 }
 
-setInterval(cleansing, 1000);
+setInterval(cleansing, 500);
 
 module.exports = function(appIn) {
   app = appIn;
