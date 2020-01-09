@@ -19,7 +19,7 @@ async function cleansing() {
     await collection
       .find(query)
       .sort({ _id: 1 })
-      .limit(100)
+      .limit(1000)
       .toArray(function(err, result) {
         if (err) throw err;
 

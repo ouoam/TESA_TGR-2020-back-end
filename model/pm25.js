@@ -1,7 +1,7 @@
 const Joi = require("@hapi/joi");
 
 const schema = Joi.object({
-  DevEUI_uplink: {
+  DevEUI_uplink: Joi.object({
     LrrRSSI: Joi.number()
       .integer()
       .required(),
@@ -13,7 +13,7 @@ const schema = Joi.object({
     DevEUI: Joi.string()
       .hex()
       .required()
-  }
+  }).required()
 }).options({ stripUnknown: true });
 
 module.exports = schema;
