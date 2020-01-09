@@ -5,8 +5,6 @@ const web = express();
 
 var cors = require("cors");
 
-const predict = require("./../inference");
-
 let app = {};
 
 class webEmitter extends EventEmitter {
@@ -45,33 +43,6 @@ web.get("/api/track_data/test", (req, res) => {
 
 web.get("/api/track_data/:sensor_id", (req, res) => {
   app.mongo.getTrackLast(req.params.sensor_id, data => res.json(data));
-});
-
-web.get("/api/predict", async (req, res) => {
-  app.mongo.getRSSI(async data => {
-    let maxTime = new Date(0);
-    for (let i = 0; i < 4; i++) {
-      if (data[i].ts > maxTime) maxTime = data[i].ts;
-    }
-
-    let cutTime = maxTime;
-    cutTime.setMinutes(cutTime.getMinutes() - 3);
-
-    let rssiOut = [90, 90, 90, 90];
-    let groupOrder = ["tgr32", "tgr7", "tgr6", "tgr29"];
-
-    for (let i = 0; i < 4; i++) {
-      if (data[i].ts < cutTime) data[i].rssi = 90;
-      else data[i].rssi = -data[i].rssi;
-      if (groupOrder.indexOf(data[i]._id) != -1) {
-        rssiOut[groupOrder.indexOf(data[i]._id)] = data[i].rssi;
-      }
-    }
-
-    const ypred = await predict(rssiOut);
-    const imax = ypred.indexOf(Math.max(...ypred)) + 1; // position of team;
-    res.json(imax);
-  });
 });
 
 web.get("/", function(req, res) {
