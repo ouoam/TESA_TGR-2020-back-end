@@ -41,7 +41,7 @@ async function cleansing() {
                 };
                 db.collection("pm25_data" + app.env.MONGO_COLL).insertOne(data2, function(err, res) {
                   if (err) throw err;
-                  console.log("Add success. PM25", new Date());
+                  // console.log("Add success. PM25", new Date());
                 });
 
                 app.influx.writePM25(data2);
@@ -64,7 +64,7 @@ async function cleansing() {
               };
               db.collection("track_data" + app.env.MONGO_COLL).insertOne(data2, function(err, res) {
                 if (err) throw err;
-                console.log("Add success. track", new Date());
+                // console.log("Add success. track", new Date());
               });
             } else {
               // console.log("Data validation error.");

@@ -25,6 +25,8 @@ class mqttEmitter extends EventEmitter {
       mqttEmitterThis.MQTTclient.subscribe("/tgr2020/pm25/data/#");
       mqttEmitterThis.MQTTclient.subscribe("/tgr2020/jan08/data/#");
       mqttEmitterThis.MQTTclient.subscribe("/tgr2020/jan09/data/#");
+
+      mqttEmitterThis.MQTTclient.subscribe("/tgr5252/jan09/data/#");
     });
 
     this.MQTTclient.on("message", function(topic, message) {
@@ -32,10 +34,13 @@ class mqttEmitter extends EventEmitter {
       if (topics[0] == "") {
         topics.shift();
       }
+      if (topics[0] == "tgr5252") {
+        topics[0] = "tgr2020";
+      }
       if (topics[0] == "tgr2020" && topics[2] == "data") {
         let msg = message.toString();
         if (topics[1] == "jan08" || topics[1] == "jan09") {
-          topics[1] = "pm25";
+          topics[1] = "track";
         }
         try {
           let json = JSON.parse(msg);
