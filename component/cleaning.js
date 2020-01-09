@@ -8,7 +8,7 @@ let app = {};
 async function cleansing() {
   var client = app.mongo.client;
 
-  if (!client.isConnected()) {
+  if (client && !client.isConnected()) {
     return;
   }
 
@@ -43,6 +43,8 @@ async function cleansing() {
                   if (err) throw err;
                   console.log("Add success. PM25", new Date());
                 });
+
+                app.influx.writePM25(data2);
               } else {
                 console.log("Data error not own device id or sensor error.", new Date());
               }
