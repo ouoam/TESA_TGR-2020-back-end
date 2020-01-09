@@ -31,8 +31,8 @@ class influxEmitter extends EventEmitter {
     this.influx
       .getDatabaseNames()
       .then(names => {
-        if (!names.includes("pm25_data")) {
-          return this.influx.createDatabase("pm25_data");
+        if (!names.includes(app.env.INFLUX_DB)) {
+          return this.influx.createDatabase(app.env.INFLUX_DB);
         }
       })
       .catch(error => console.log({ error }));
