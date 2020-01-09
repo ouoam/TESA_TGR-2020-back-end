@@ -36,7 +36,7 @@ class mongoEmitter extends EventEmitter {
     if (this.client && this.client.isConnected()) {
       this.dbo.collection("raw_data" + app.env.MONGO_COLL).insertOne(data, function(err, res) {
         if (err) throw err;
-        console.log("Add raw success.", new Date());
+        // console.log("Add raw success.", new Date());
       });
     } else {
       console.log("Not connect DB.");

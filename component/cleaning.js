@@ -47,7 +47,7 @@ async function cleansing() {
                 console.log("Data error not own device id or sensor error.", new Date());
               }
             } else {
-              console.log("Data validation error.");
+              // console.log("Data validation error.");
             }
           } else if (element.sensor_type == "track") {
             let value = model.track.validate(element.data);
@@ -64,7 +64,7 @@ async function cleansing() {
                 console.log("Add success. track", new Date());
               });
             } else {
-              console.log("Data validation error.");
+              // console.log("Data validation error.");
             }
           }
 
