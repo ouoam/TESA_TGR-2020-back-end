@@ -68,7 +68,7 @@ class mongoEmitter extends EventEmitter {
   getPM25Last(devID, cb) {
     this.dbo
       .collection("pm25_data" + app.env.MONGO_COLL)
-      .find({ id: devID })
+      .find({ device_id: devID })
       .sort({ ts: -1 })
       .limit(1)
       .toArray(function(err, result) {
