@@ -33,6 +33,10 @@ web.get("/api/pm25_data/test", (req, res) => {
   app.mongo.getPM25Me(data => res.json(data));
 });
 
+web.get("/api/pm25_data/last", (req, res) => {
+  app.mongo.getPM25(data => res.json(data));
+});
+
 web.get("/api/pm25_data/:device_id([0-9]*)", (req, res) => {
   app.mongo.getPM25Last(Number(req.params.device_id), data => res.json(data));
 });

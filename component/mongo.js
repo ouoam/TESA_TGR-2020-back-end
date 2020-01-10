@@ -81,6 +81,43 @@ class mongoEmitter extends EventEmitter {
     this.getPM25Last(32, cb);
   }
 
+  getPM25(cb) {
+    const db = app.mongo.dbo;
+    db.collection("pm25_data" + app.env.MONGO_COLL)
+      .aggregate([
+        {
+          $sort: {
+            ts: -1
+          }
+        },
+        {
+          $group: {
+            _id: "$device_id",
+            ts: {
+              $first: "$ts"
+            },
+            lat: {
+              $first: "$lat"
+            },
+            lon: {
+              $first: "$lon"
+            },
+            value: {
+              $first: "$value"
+            }
+          }
+        },
+        {
+          $sort: {
+            _id: 1
+          }
+        }
+      ])
+      .toArray(function(err, result) {
+        cb(result);
+      });
+  }
+
   getTrackList(query, cb) {
     let find = {};
     if (query.start) {
