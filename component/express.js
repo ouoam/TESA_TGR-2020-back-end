@@ -86,9 +86,11 @@ web.get("/api/predict", async (req, res) => {
   });
 });
 
-web.get("/", function(req, res) {
-  res.send("tgr32");
-});
+web.use("/", express.static("./front/build"));
+
+// web.get("/", function(req, res) {
+//   res.send("tgr32");
+// });
 
 // catch 404 and forward to error handler
 web.use((req, res) => {
