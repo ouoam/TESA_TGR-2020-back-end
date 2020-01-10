@@ -45,6 +45,10 @@ web.get("/api/track_data/test", (req, res) => {
   app.mongo.getTrackMe(data => res.json(data));
 });
 
+web.get("/api/track_data/myrssi", (req, res) => {
+  app.mongo.getTrackMeRSSIlist(req.query, data => res.json(data));
+});
+
 web.get("/api/track_data/:sensor_id", (req, res) => {
   app.mongo.getTrackLast(req.params.sensor_id, data => res.json(data));
 });

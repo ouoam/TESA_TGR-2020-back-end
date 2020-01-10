@@ -127,6 +127,37 @@ class mongoEmitter extends EventEmitter {
       });
   }
 
+  getTrackMeRSSIlist(query, cb) {
+    let find = {
+      $and: [
+        { mac_addr: "80:E1:26:07:D7:43" },
+        { $or: [{ sensor_id: "tgr6" }, { sensor_id: "tgr7" }, { sensor_id: "tgr29" }, { sensor_id: "tgr32" }] }
+      ]
+    };
+    let sort = { ts: -1 };
+    if (query.start) {
+      if (!find.$and.ts) find.$and.ts = {};
+      find.$and.ts.$gte = new Date(query.start);
+    }
+    if (query.end) {
+      if (!find.$and.ts) find.$andts = {};
+      find.$and.ts.$lte = new Date(query.end);
+    }
+    if (query.sort) {
+      sort.ts = query.sort == 1 ? 1 : -1;
+    }
+    let re = this.dbo
+      .collection("track_data" + app.env.MONGO_COLL)
+      .find(find, { timestamp: 0, event_code: 0 })
+      .sort(sort);
+    if (query.skip) re.skip(Number(query.skip));
+    if (query.limit) re.limit(Number(query.limit));
+    re.toArray(function(err, result) {
+      if (err) throw err;
+      cb(result || null);
+    });
+  }
+
   getRSSI(cb) {
     const db = app.mongo.dbo;
     db.collection("track_data" + app.env.MONGO_COLL)
