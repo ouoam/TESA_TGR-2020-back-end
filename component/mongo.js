@@ -164,12 +164,12 @@ class mongoEmitter extends EventEmitter {
       .aggregate([
         {
           $match: {
-            mac_addr: "80:E1:26:07:D7:43"
-          }
-        },
-        {
-          $match: {
-            $or: [{ sensor_id: "tgr6" }, { sensor_id: "tgr7" }, { sensor_id: "tgr29" }, { sensor_id: "tgr32" }]
+            $and: [
+              { mac_addr: "80:E1:26:07:D7:43" },
+              {
+                $or: [{ sensor_id: "tgr6" }, { sensor_id: "tgr7" }, { sensor_id: "tgr29" }, { sensor_id: "tgr32" }]
+              }
+            ]
           }
         },
         {
