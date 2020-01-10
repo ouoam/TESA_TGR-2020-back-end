@@ -1,6 +1,7 @@
 const EventEmitter = require("events");
 
 const express = require("express");
+const compression = require("compression");
 const web = express();
 
 const predict = require("./../inference");
@@ -20,6 +21,7 @@ class webEmitter extends EventEmitter {
 }
 
 web.use(cors());
+web.use(compression());
 web.use(express.json());
 web.use(express.urlencoded({ extended: true }));
 
